@@ -1,0 +1,59 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.1.1
+    hostname: zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - pub
+  kafka-broker:
+    image: confluentinc/cp-kafka:6.1.1
+    hostname: broker
+    container_name: broker
+    depends_on:
+    - zookeeper
+    ports:
+    - "29092:29092"
+    networks:
+      - pub
+    environment:
+      KAFKA_BROKER_ID: 101
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  producer:
+    image: prod:latest
+    depends_on:
+    - kafka-broker
+    environment:
+      BROKER_HOST: 'broker:9902'
+    networks:
+      - pub
+  consumer:
+    image: cons:latest
+    depends_on:
+      - kafka-broker
+      - producer
+    networks:
+      - pub
+#  database:
+#    image: base
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_DATABASE: baza
+#      MYSQL_USER: dockerdb
+#      MYSQL_PASSWORD: adrian
+#    volumes:
+#      - /var/lib/mysql      
+
+
+networks:
+  pub:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
