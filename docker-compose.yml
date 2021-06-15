@@ -27,6 +27,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
   producer:
+    container_name: producer
     image: prod:latest
     depends_on:
     - kafka-broker
@@ -35,21 +36,28 @@ services:
     networks:
       - pub
   consumer:
+    stdin_open: true
+    tty: true
+    container_name: consumer
     image: cons:latest
     depends_on:
       - kafka-broker
       - producer
+      - database
     networks:
       - pub
-#  database:
-#    image: base
-#    environment:
-#      MYSQL_ROOT_PASSWORD: root
-#      MYSQL_DATABASE: baza
-#      MYSQL_USER: dockerdb
-#      MYSQL_PASSWORD: adrian
-#    volumes:
-#      - /var/lib/mysql      
+  database:
+    container_name: database
+    image: base
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: baza
+      MYSQL_USER: dockerdb
+      MYSQL_PASSWORD: adrian
+    volumes:
+      - /home/docker/test:/var/lib/mysql
+    networks:
+      - pub
 
 
 networks:

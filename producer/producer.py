@@ -12,16 +12,17 @@ run = False
 
 while run != True:
     try:
-        producer = KafkaProducer(bootstrap_servers=['172.20.0.3:9092'],
+        producer = KafkaProducer(bootstrap_servers=['broker:9092'],
                          value_serializer= json_serializer)
         run=True
     except kafka.errors.NoBrokersAvailable as e:
-        print("waiting for broker")
+        pass
+       # print("waiting for broker")
 
 
 if __name__ == "__main__":
     while 1 == 1:
         temp = random.randint(0, 1000)/10
         print("Temperature: " + str(temp))
-       	producer.send("temperature", str(temp))
+       	producer.send("temperature", temp)
         time.sleep(random.randint(0,10))
